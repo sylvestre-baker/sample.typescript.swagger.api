@@ -1,0 +1,135 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "LAUNCH Development WINDOWS BASH",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "start"
+            ],
+            "port": 9229,
+            "useWSL": true,
+            "console": "internalConsole",
+            "env": {
+                "NODE_ENV": "development"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "LAUNCH Development",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "start:dev"
+            ],
+            "port":9229,
+            "program": "${workspaceRoot}/dist/servers/sample.typescript.swagger.api/index.js",
+            "cwd": "${workspaceRoot}",
+            "sourceMaps": true,
+            "console": "internalConsole"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "LAUNCH Production WINDOWS BASH",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "start"
+            ],
+            "port": 9229,
+            "useWSL": true,
+            "console": "internalConsole",
+            "env": {
+                "NODE_ENV": "production"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "LAUNCH Production",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "start:prod"
+            ],
+            "port": 9229,
+            "program": "${workspaceRoot}/dist/servers/sample.typescript.swagger.api/index.js",
+            "cwd": "${workspaceRoot}",
+            "sourceMaps": true,
+            "console": "integratedTerminal"
+        },
+
+
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "LAUNCH BO Development WINDOWS BASH",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "start:bo"
+            ],
+            "port": 9229,
+            "useWSL": true,
+            "console": "internalConsole",
+            "env": {
+                "NODE_ENV": "development"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "LAUNCH BO Development",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "start:dev:bo"
+            ],
+            "port":9229,
+            "program": "${workspaceRoot}/dist/servers/sample.typescript.swagger.bo.api/index.js",
+            "cwd": "${workspaceRoot}",
+            "sourceMaps": true,
+            "console": "internalConsole"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "LAUNCH BO Production WINDOWS BASH",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "start:bo"
+            ],
+            "port": 9229,
+            "useWSL": true,
+            "console": "internalConsole",
+            "env": {
+                "NODE_ENV": "production"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "LAUNCH BO Production",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "start:prod:bo"
+            ],
+            "port": 9229,
+            "program": "${workspaceRoot}/dist/servers/sample.typescript.swagger.bo.api/index.js",
+            "cwd": "${workspaceRoot}",
+            "sourceMaps": true,
+            "console": "integratedTerminal"
+        },
+        
+    ]
+}

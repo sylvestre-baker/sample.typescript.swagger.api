@@ -1,0 +1,11 @@
+sudo forever-service install sample-typescript-swagger-api-dev -s dist/servers/sample.typescript.swagger.api/index.js -e "NODE_ENV=development"
+forever-service version 0.5.11
+
+Platform - Debian GNU/Linux 8 (jessie)
+sample-typescript-swagger-api-dev provisioned successfully
+
+Commands to interact with service sample-typescript-swagger-api-dev
+Start   - "sudo service sample-typescript-swagger-api-dev start"
+Stop    - "sudo service sample-typescript-swagger-api-dev stop"
+Status  - "sudo service sample-typescript-swagger-api-dev status"
+Restart - "sudo service sample-typescript-swagger-api-dev restart"

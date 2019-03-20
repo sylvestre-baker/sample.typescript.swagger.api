@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "noStrictGenericChecks": true,
+        "baseUrl": "dist",
+        "lib": ["es6","es2015", "es2016", "es2017", "dom"],
+        "pretty": true,
+        "noEmit": false,
+        "skipLibCheck": true,
+        "paths": {
+             "*": [ 
+                 "./*", 
+                 "./dist/*"
+                ]
+        },
+        "outDir": "dist",
+        "rootDirs": [
+            "src",
+            "dist"
+          ]
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
