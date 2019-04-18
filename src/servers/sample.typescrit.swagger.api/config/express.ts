@@ -29,7 +29,7 @@ export function configureExpress(app: Application) {
                     apiKeyHeader: {
                         type: SwaggerDefinitionConstant.Security.Type.API_KEY,
                         in: SwaggerDefinitionConstant.Security.In.HEADER,
-                        name: 'Bearer Token',
+                        name: 'Authorization',
                     }
                 }
                 // Models can be defined here

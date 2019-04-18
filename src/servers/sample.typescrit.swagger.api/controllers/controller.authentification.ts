@@ -8,7 +8,12 @@ import { TYPES } from '../../../modules/common/';
 import { ServiceAuthentification, UserEmailAuthRequest, UserEmailPasswordAuthRequest, AccesTokenAuthResponse } from '../../../modules/auth/index';
 import { CreateUserRequest, FindUserByEmailRequest, ServiceUser, UserResponse, FindUserByEmailVerificationIdRequest } from '../../../modules/users/index';
 import * as appInsights from 'applicationinsights';
+import { ApiPath, ApiOperationPost, ApiOperationPut, ApiOperationDelete, SwaggerDefinitionConstant } from 'swagger-express-ts';
 
+@ApiPath({
+    path: "/auth",
+    name: "Authentification",
+})
 @controller('/auth')
 @injectable()
 export class ControllerAuthentification {
@@ -17,6 +22,19 @@ export class ControllerAuthentification {
         @inject(TYPES.ServiceUser) private serviceUser: ServiceUser,
     ) { }
 
+    @ApiOperationPost({
+        path: '/signup',
+        description: "Signup",
+        summary: "Signup",
+        parameters: {
+            body: { description: "Signup", required: true, model: "CreateUserRequest" }
+        },
+
+        responses: {
+            200: { model: "AccesTokenAuthResponse" },
+            400: { model: "AccesTokenAuthResponse" }
+        },
+    })
     @httpPost('/signup', validateBody(CreateUserRequest))
     public async signup(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -41,6 +59,20 @@ export class ControllerAuthentification {
         }
     }
 
+
+    @ApiOperationPost({
+        path: '/signin',
+        description: "Signin",
+        summary: "Signin",
+        parameters: {
+            body: { description: "Signin", required: true, model: "UserEmailPasswordAuthRequest" }
+        },
+
+        responses: {
+            200: { model: "AccesTokenAuthResponse" },
+            400: { model: "AccesTokenAuthResponse" }
+        },
+    })
     @httpPost('/signin', validateBody(UserEmailPasswordAuthRequest))
     public async signin(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -65,6 +97,20 @@ export class ControllerAuthentification {
         }
     }
 
+
+    @ApiOperationPost({
+        path: '/find/email/exist',
+        description: "Find email exist",
+        summary: "Find email exist",
+        parameters: {
+            body: { description: "Find email exist", required: true, model: "FindUserByEmailRequest" }
+        },
+
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+    })
     @httpPost('/find/email/exist', validateBody(FindUserByEmailRequest))
     public async userWithEmailExist(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -87,6 +133,24 @@ export class ControllerAuthentification {
         }
     }
 
+    @ApiOperationPost({
+        path: '/verify',
+        description: "Verify email",
+        summary: "Verify email",
+        parameters: {
+            query: {
+                id: {
+                    required: true,
+                    type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                }
+            }
+        },
+
+        responses: {
+            200: { type: SwaggerDefinitionConstant.Parameter.Type.STRING },
+            400: { type: SwaggerDefinitionConstant.Parameter.Type.STRING }
+        },
+    })
     @httpGet('/verify')
     public async verify(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });

@@ -11,7 +11,7 @@ import { ServiceUser, FindUserByIdRequest, UserResponse, FindUserByEmailRequest,
 import * as jwt from 'jsonwebtoken';
 import config from '../config/env';
 import * as appInsights from 'applicationinsights';
-import { ApiPath, ApiOperationPost } from 'swagger-express-ts';
+import { ApiPath, ApiOperationPost, ApiOperationPut, ApiOperationDelete, SwaggerDefinitionConstant } from 'swagger-express-ts';
 
 @ApiPath({
     path: "/user",
@@ -27,11 +27,11 @@ export class ControllerUser {
     ) { }
 
     @ApiOperationPost({
-        path:'/find/userId',
+        path: '/find/userId',
         description: "Find user by userId",
         summary: "Find user by userId",
         parameters: {
-            body: { description: "Find user by userId", required: true, model: "FindUserByIdRequest" }  
+            body: { description: "Find user by userId", required: true, model: "FindUserByIdRequest" }
         },
 
         responses: {
@@ -75,6 +75,20 @@ export class ControllerUser {
         }
     }
 
+    @ApiOperationPost({
+        path: '/find/email',
+        description: "Find user by email",
+        summary: "Find user by email",
+        parameters: {
+            body: { description: "Find user by email", required: true, model: "FindUserByEmailRequest" }
+        },
+
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+        security: { apiKeyHeader: [] }
+    })
     @httpPost('/find/email', validateBody(FindUserByEmailRequest))
     public async findByEmail(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -108,7 +122,20 @@ export class ControllerUser {
         }
     }
 
+    @ApiOperationPut({
+        path: '/update/userId',
+        description: "Update user by userId",
+        summary: "Update user by userId",
+        parameters: {
+            body: { description: "Update user by userId", required: true, model: "EditUserRequest" }
+        },
 
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+        security: { apiKeyHeader: [] }
+    })
     @httpPut('/update/userId', validateBody(EditUserRequest))
     public async update(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -142,6 +169,20 @@ export class ControllerUser {
         }
     }
 
+    @ApiOperationPut({
+        path: '/update/password',
+        description: "Update password of user by userId",
+        summary: "Update password of user by userId",
+        parameters: {
+            body: { description: "Update password of by userId", required: true, model: "EditUserPasswordRequest" }
+        },
+
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+        security: { apiKeyHeader: [] }
+    })
     @httpPut('/update/password', validateBody(EditUserPasswordRequest))
     public async editPassword(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -175,6 +216,20 @@ export class ControllerUser {
         }
     }
 
+    @ApiOperationPut({
+        path: '/update/email',
+        description: "Update email of user by userId",
+        summary: "Update email of user by userId",
+        parameters: {
+            body: { description: "Update email of user by userId", required: true, model: "EditUserEmailRequest" }
+        },
+
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+        security: { apiKeyHeader: [] }
+    })
     @httpPut('/update/email', validateBody(EditUserEmailRequest))
     public async editEmail(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -209,6 +264,20 @@ export class ControllerUser {
 
     }
 
+    @ApiOperationPut({
+        path: '/update/facebook',
+        description: "Update facebook of user by userId",
+        summary: "Update facebook of user by userId",
+        parameters: {
+            body: { description: "Update facebook of user by userId", required: true, model: "EditUserFacebookInformationsRequest" }
+        },
+
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+        security: { apiKeyHeader: [] }
+    })
     @httpPut('/update/facebook', validateBody(EditUserFacebookInformationsRequest))
     public async setFacebookInfos(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -242,7 +311,20 @@ export class ControllerUser {
         }
     }
 
+    @ApiOperationPut({
+        path: '/update/mobileToken',
+        description: "Update mobileToken of user by userId",
+        summary: "Update mobileToken of user by userId",
+        parameters: {
+            body: { description: "Update mobileToken of user by userId", required: true, model: "EditUserMobileTokensRequest" }
+        },
 
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+        security: { apiKeyHeader: [] }
+    })
     @httpPut('/update/mobileToken', validateBody(EditUserMobileTokensRequest))
     public async setMobileToken(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -276,6 +358,20 @@ export class ControllerUser {
         }
     }
 
+    @ApiOperationPost({
+        path: '/send/emailVerification',
+        description: "Send email to user by userId",
+        summary: "Send email to user by userId",
+        parameters: {
+            body: { description: "Send email to user by userId", required: true, model: "FindUserByIdRequest" }
+        },
+
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+        security: { apiKeyHeader: [] }
+    })
     @httpPost('/send/emailVerification', validateBody(FindUserByIdRequest))
     public async sendEmailVerification(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
@@ -309,7 +405,27 @@ export class ControllerUser {
         }
     }
 
-    @httpDelete('/remove/userId', validateBody(FindUserByIdRequest))
+    @ApiOperationDelete({
+        path: '/remove/userId',
+        description: "Delete user by userId",
+        summary: "Delete user by userId",
+        parameters: {
+            path: {
+                id: {
+                    description: "Id of user",
+                    type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                    required: true
+                }
+            }
+        },
+
+        responses: {
+            200: { model: "UserResponse" },
+            400: { model: "UserResponse" }
+        },
+        security: { apiKeyHeader: [] }
+    })
+    @httpDelete('/remove/userId', validateQuery(FindUserByIdRequest))
     public async remove(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
         try {
