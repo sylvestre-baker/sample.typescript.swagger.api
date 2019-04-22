@@ -147,6 +147,16 @@ export class StoreUser {
         });
     }
 
+    setGodfatherCode(id: string, godfatherCode: string): Promise<ModelUser> {
+        return new Promise<ModelUser>(async (resolve) => {
+            const user = await this.get(id);
+            user.godfatherCode = godfatherCode;
+            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUser) => {
+                resolve(data);
+            });
+        });
+    }
+
     editPassword(id: string, password: string): Promise<ModelUser> {
         return new Promise<ModelUser>(async (resolve) => {
             const user = await this.get(id);

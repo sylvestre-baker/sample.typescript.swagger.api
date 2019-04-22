@@ -9,6 +9,7 @@ const cors = require('cors');
 
 import * as swagger from "swagger-express-ts";
 import { SwaggerDefinitionConstant } from "swagger-express-ts";
+import { useServiceGodfather } from '../../../modules/godfathers/index';
 
 export function configureExpress(app: Application) {
 
@@ -50,4 +51,5 @@ export function configureExpress(app: Application) {
 
     useAuth(app, container);
     useServiceUser(app, container);
+    useServiceGodfather(app, container);
 }

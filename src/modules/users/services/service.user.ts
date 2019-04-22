@@ -29,12 +29,16 @@ import {
 import * as nodemailer from 'nodemailer';
 import * as smtpPool from 'nodemailer-smtp-pool';
 import { resolve } from 'url';
+import { StoreGodfather, StoreGodchild } from '../../godfathers/index';
 
 @injectable()
 export class ServiceUser {
     private smtpTransport = null;
     constructor(
         @inject(TYPES.StoreUser) private store: StoreUser,
+        @inject(TYPES.StoreGodfather) private storeGodfather: StoreGodfather,
+        @inject(TYPES.StoreGodchild) private storeGodchild: StoreGodchild,
+
     ) {
         this.smtpTransport = nodemailer.createTransport({
             service: "Gmail",
@@ -61,6 +65,8 @@ export class ServiceUser {
                 newUser.password, newUser.photoUrl, newUser.facebookId, newUser.facebookAccessToken);
 
             if (user) {
+                const godfather = await this.storeGodfather.create(user.email, user._id.toString());
+                user = await this.store.setGodfatherCode(user._id.toString(), godfather.code);
                 const findUser: FindUserByIdRequest = new FindUserByIdRequest();
                 findUser.userId = user._id.toString();
                 const email = await this.sendEmailVerification(findUser, host);
@@ -273,6 +279,8 @@ export class ServiceUser {
                 return email;
             else {
                 if (user) {
+                    await this.storeGodfather.editUserEmailByCode(user.godfatherCode, user.email);
+                    await this.storeGodchild.editUserEmailByCode(user.godfatherCode, user.email);
                     userResponse.message = `User with this id ${editUser.userId} email changed`;
                     userResponse.success = true;
                     userResponse.user = user;

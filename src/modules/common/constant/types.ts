@@ -6,6 +6,10 @@ export const TYPES = {
     StoreUserAdmin: Symbol('StoreUserAdmin'),
     ServiceAuthentification: Symbol('ServiceAuthentification'),
     ServiceNotification: Symbol('ServiceNotification'),
+    ServiceGodfather: Symbol('ServiceGodfather'),
+    StoreGodfather: Symbol('StoreGodfather'),
+    //ServiceGodchild: Symbol('ServiceGodchild'),
+    StoreGodchild: Symbol('StoreGodchild'),
 };
 
 export default TYPES;

@@ -1,5 +1,6 @@
 export const TAGS = {
     ControllerHome: 'ControllerHome',
+    ControllerAuthentification: 'ControllerAuthentification',
     ControllerUser: 'ControllerUser',
-    ControllerAuthentification: 'ControllerAuthentification'
+    ControllerGodfather: 'ControllerGodfather'
 };

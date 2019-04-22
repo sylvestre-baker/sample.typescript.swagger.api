@@ -54,6 +54,8 @@ export class ModelUser {
     @ApiModelProperty()
     gender: ModelGender;
     @ApiModelProperty()
+    godfatherCode: string;
+    @ApiModelProperty()
     facebookId: string;
     @ApiModelProperty()
     facebookAccessToken: string;
