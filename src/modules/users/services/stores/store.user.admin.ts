@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../../common';
 import { MongoDBClient } from '../../../database';
-import { ModelUser, ModelGender, ModelAddress } from '../../models/index';
+import { ModelUserAdmin, ModelGender, ModelAddress } from '../../models/index';
 import * as bcrypt from 'bcrypt';
 import * as  generator from 'generate-password';
 @injectable()
@@ -15,111 +15,110 @@ export class StoreUserAdmin {
         this.saltRounds = 10;
     }
 
-    create(firstname: string, lastname: string, email: string, password: string): Promise<ModelUser> {
-        return new Promise<ModelUser>(async (resolve) => {
-            const user = new ModelUser();
+    create(firstname: string, lastname: string, email: string, password: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>(async (resolve) => {
+            const user = new ModelUserAdmin();
             user.firstname = firstname;
             user.lastname = lastname;
             user.email = email;
             user.password = await bcrypt.hash(password, this.saltRounds);
-            this.mongoClient.insert(this.collectionName, user, (error, data: ModelUser) => {
+            this.mongoClient.insert(this.collectionName, user, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    getAll(): Promise<ModelUser[]> {
-        return new Promise<ModelUser[]>((resolve) => {
-            this.mongoClient.find(this.collectionName, {}, (error, data: ModelUser[]) => {
+    getAll(): Promise<ModelUserAdmin[]> {
+        return new Promise<ModelUserAdmin[]>((resolve) => {
+            this.mongoClient.find(this.collectionName, {}, (error, data: ModelUserAdmin[]) => {
                 resolve(data);
             });
         });
     }
 
-    get(id: string): Promise<ModelUser> {
-        return new Promise<ModelUser>((resolve) => {
-            this.mongoClient.findOneById(this.collectionName, id, (error, data: ModelUser) => {
+    get(id: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>((resolve) => {
+            this.mongoClient.findOneById(this.collectionName, id, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    getByEmail(email: string): Promise<ModelUser> {
-        return new Promise<ModelUser>((resolve) => {
-            this.mongoClient.findOneByFilter(this.collectionName, { email: email }, (error, data: ModelUser) => {
+    getByEmail(email: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>((resolve) => {
+            this.mongoClient.findOneByFilter(this.collectionName, { email: email }, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    getByEmailVerificationId(emailVerificationId: string): Promise<ModelUser> {
-        return new Promise<ModelUser>((resolve) => {
-            this.mongoClient.findOneByFilter(this.collectionName, { emailVerificationId: emailVerificationId }, (error, data: ModelUser) => {
+    getByEmailVerificationId(emailVerificationId: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>((resolve) => {
+            this.mongoClient.findOneByFilter(this.collectionName, { emailVerificationId: emailVerificationId }, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    edit(id: string, firstname: string, lastname: string,gender: ModelGender): Promise<ModelUser> {
-        return new Promise<ModelUser>(async (resolve) => {
+    edit(id: string, firstname: string, lastname: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>(async (resolve) => {
             const user = await this.get(id);
             user.firstname = firstname;
             user.lastname = lastname;
-            user.gender = gender;
-            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUser) => {
+            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    setAccessToken(id: string, accessToken: string): Promise<ModelUser> {
-        return new Promise<ModelUser>(async (resolve) => {
+    setAccessToken(id: string, accessToken: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>(async (resolve) => {
             const user = await this.get(id);
             user.accessToken = accessToken;
-            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUser) => {
+            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    setEmailVerificationId(id: string): Promise<ModelUser> {
-        return new Promise<ModelUser>(async (resolve) => {
+    setEmailVerificationId(id: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>(async (resolve) => {
             const user = await this.get(id);
             user.emailVerificationId = this.generateId(50);
             user.emailVerified = false;
-            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUser) => {
+            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    setEmailVerified(id: string): Promise<ModelUser> {
-        return new Promise<ModelUser>(async (resolve) => {
+    setEmailVerified(id: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>(async (resolve) => {
             const user = await this.get(id);
             user.emailVerified = true;
             user.emailVerificationId = null;
-            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUser) => {
+            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    setEnable(id: string, enable: boolean): Promise<ModelUser> {
-        return new Promise<ModelUser>(async (resolve) => {
+    setEnable(id: string, enable: boolean): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>(async (resolve) => {
             const user = await this.get(id);
             user.enable = enable;
-            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUser) => {
+            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });
     }
 
-    editPassword(id: string, password: string): Promise<ModelUser> {
-        return new Promise<ModelUser>(async (resolve) => {
+    editPassword(id: string, password: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>(async (resolve) => {
             const user = await this.get(id);
             user.oldPasswords.push(user.password);
             user.password = await bcrypt.hash(password, this.saltRounds);
-            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUser) => {
+            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
 
@@ -145,12 +144,12 @@ export class StoreUserAdmin {
     }
 
 
-    editEmail(id: string, email: string): Promise<ModelUser> {
-        return new Promise<ModelUser>(async (resolve) => {
+    editEmail(id: string, email: string): Promise<ModelUserAdmin> {
+        return new Promise<ModelUserAdmin>(async (resolve) => {
             const user = await this.get(id);
             user.email = email;
             user.emailVerified = false;
-            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUser) => {
+            this.mongoClient.update(this.collectionName, id, user, (error, data: ModelUserAdmin) => {
                 resolve(data);
             });
         });

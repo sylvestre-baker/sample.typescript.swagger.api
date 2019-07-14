@@ -3,11 +3,11 @@ import { httpGet, httpPost, httpPut, httpDelete, controller } from 'inversify-ex
 import { injectable, inject } from 'inversify';
 
 import { Request, Response, NextFunction } from 'express';
-import { validateBody, validateQuery, authorize, authorizeAdmin, validate } from '../../../modules/common';
+import { validateBody, validateQuery, authorize, authorizeAdmin, validate, ResponseFailure, validateParams } from '../../../modules/common';
 
 
 import { TYPES } from '../../../modules/common/';
-import { ServiceUser, FindUserByIdRequest, UserResponse, FindUserByEmailRequest, EditUserRequest, EditUserPasswordRequest, EditUserEmailRequest, EditUserFacebookInformationsRequest, EditUserMobileTokensRequest, EditUserPhotoByIdRequest } from '../../../modules/users/index';
+import { ServiceUser, FindUserByIdRequest, UserResponse, FindUserByEmailRequest, EditUserRequest, EditUserPasswordRequest, EditUserEmailRequest, EditUserFacebookInformationsRequest, EditUserMobileTokensRequest } from '../../../modules/users/index';
 import * as jwt from 'jsonwebtoken';
 import config from '../config/env';
 import * as appInsights from 'applicationinsights';
@@ -36,7 +36,9 @@ export class ControllerUser {
 
         responses: {
             200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -48,30 +50,19 @@ export class ControllerUser {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
             if (decodedToken.userId != req.body.userId) {
-                const resp = new UserResponse();
-                resp.message = `User with this id ${req.body.userId} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(405).send(ResponseFailure(405, `User with this id ${req.body.userId} is not allowed`));
             }
             else {
                 const resp = await this.serviceUser.find(req.body);
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -85,7 +76,9 @@ export class ControllerUser {
 
         responses: {
             200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -96,29 +89,19 @@ export class ControllerUser {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
             if (decodedToken.email != req.body.email) {
-                const resp = new UserResponse();
-                resp.message = `User with this email ${req.body.email} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(405).send(ResponseFailure(405, `User with this email ${req.body.email} is not allowed`));
             }
             else {
                 const resp = await this.serviceUser.findByEmail(req.body);
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -132,7 +115,9 @@ export class ControllerUser {
 
         responses: {
             200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -143,29 +128,19 @@ export class ControllerUser {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
             if (decodedToken.userId != req.body.userId) {
-                const resp = new UserResponse();
-                resp.message = `User with this id ${req.body.userId} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(405).send(ResponseFailure(405, `User with this email ${req.body.email} is not allowed`));
             }
             else {
                 const resp = await this.serviceUser.update(req.body);
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -178,8 +153,10 @@ export class ControllerUser {
         },
 
         responses: {
-            200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            202: { model: "UserResponse" },
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -190,29 +167,20 @@ export class ControllerUser {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
             if (decodedToken.userId != req.body.userId) {
-                const resp = new UserResponse();
-                resp.message = `User with this id ${req.body.userId} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(405).send(ResponseFailure(405, `User with this id ${req.body.userId} is not allowed`));
             }
             else {
                 const resp = await this.serviceUser.editPassword(req.body);
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
-        } catch (ex) {
+        }
+        catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -225,8 +193,10 @@ export class ControllerUser {
         },
 
         responses: {
-            200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            202: { model: "UserResponse" },
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -237,29 +207,19 @@ export class ControllerUser {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
             if (decodedToken.userId != req.body.userId) {
-                const resp = new UserResponse();
-                resp.message = `User with this id ${req.body.userId} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(405).send(ResponseFailure(405, `User with this id ${req.body.userId} is not allowed`));
             }
             else {
                 const resp = await this.serviceUser.editEmail(req.body, req.get('host'));
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
 
     }
@@ -274,7 +234,9 @@ export class ControllerUser {
 
         responses: {
             200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -285,29 +247,19 @@ export class ControllerUser {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
             if (decodedToken.userId != req.body.userId) {
-                const resp = new UserResponse();
-                resp.message = `User with this id ${req.body.userId} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(405).send(ResponseFailure(405, `User with this id ${req.body.userId} is not allowed`));
             }
             else {
                 const resp = await this.serviceUser.setFacebookInfos(req.body);
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -321,7 +273,9 @@ export class ControllerUser {
 
         responses: {
             200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -332,29 +286,19 @@ export class ControllerUser {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
             if (decodedToken.userId != req.body.userId) {
-                const resp = new UserResponse();
-                resp.message = `User with this id ${req.body.userId} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(405).send(ResponseFailure(405, `User with this id ${req.body.userId} is not allowed`));
             }
             else {
                 const resp = await this.serviceUser.setMobileToken(req.body);
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -367,8 +311,10 @@ export class ControllerUser {
         },
 
         responses: {
-            200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            202: { model: "UserResponse" },
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -379,39 +325,31 @@ export class ControllerUser {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
             if (decodedToken.userId != req.body.userId) {
-                const resp = new UserResponse();
-                resp.message = `User with this id ${req.body.userId} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(405).send(ResponseFailure(405, `User with this id ${req.body.userId} is not allowed`));
             }
             else {
                 const resp = await this.serviceUser.sendEmailVerification(req.body, req.get('host'));
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
+
+
 
     @ApiOperationDelete({
         path: '/remove/userId',
         description: "Delete user by userId",
         summary: "Delete user by userId",
         parameters: {
-            path: {
-                id: {
+            query: {
+                userId: {
                     description: "Id of user",
                     type: SwaggerDefinitionConstant.Parameter.Type.STRING,
                     required: true
@@ -421,7 +359,9 @@ export class ControllerUser {
 
         responses: {
             200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
         security: { apiKeyHeader: [] }
     })
@@ -431,30 +371,20 @@ export class ControllerUser {
         try {
             const token = req.headers.authorization.split(' ')[1];
             const decodedToken = jwt.verify(token, config.secret);
-            if (decodedToken.userId != req.body.userId) {
-                const resp = new UserResponse();
-                resp.message = `User with this id ${req.body.userId} is not allowed`;
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+            if (decodedToken.userId != req.query.userId) {
+                res.status(405).send(ResponseFailure(405, `User with this id ${req.query.userId} is not allowed`));
             }
             else {
-                const resp = await this.serviceUser.remove(req.body);
+                const resp = await this.serviceUser.remove(req.query);
                 if (!resp) {
-                    const resp = new UserResponse();
-                    resp.message = 'BAD REQUEST';
-                    resp.success = false;
-                    resp.user = null;
-                    res.status(400).send(resp);
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else if (!resp.success)
-                    res.status(400).send(resp);
                 else
-                    res.send(resp);
+                    res.status(resp.code).send(resp);
             }
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 }

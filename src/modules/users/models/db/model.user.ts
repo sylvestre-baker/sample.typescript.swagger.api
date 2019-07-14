@@ -2,6 +2,18 @@ import { ApiModel, ApiModelProperty } from "swagger-express-ts";
 
 
 @ApiModel({
+    description: "Push One Signal Model from DB",
+    name: "ModelPushOneSignal"
+})
+export class ModelPushOneSignal {
+    @ApiModelProperty()
+    userIdOneSignal: string;
+    @ApiModelProperty()
+    pushToken: string;
+}
+
+
+@ApiModel({
     description: "Address Model from DB",
     name: "ModelAddress"
 })
@@ -36,8 +48,12 @@ export class ModelUser {
     @ApiModelProperty()
     email: string;
     @ApiModelProperty()
-    phoneNumber: string;
+    birthDate: string;
     @ApiModelProperty()
+    phoneNumber: string;
+    @ApiModelProperty({
+        model:'ModelAddress'
+    })
     address: ModelAddress = new ModelAddress();
     @ApiModelProperty()
     claims: ModelClaims = ModelClaims.USER;
@@ -60,10 +76,48 @@ export class ModelUser {
     @ApiModelProperty()
     facebookAccessToken: string;
     @ApiModelProperty()
+    pubToken: string;
+    @ApiModelProperty({
+        model: 'ModelPushOneSignal'
+    })
+    push: ModelPushOneSignal;
+    @ApiModelProperty()
     isAdmin: boolean = false;
+    @ApiModelProperty()
+    passwordVerificationId: string;
+
 
 }
 
+
+@ApiModel({
+    description: "User Admin Model from DB",
+    name: "ModelUserAdmin"
+})
+export class ModelUserAdmin {
+    @ApiModelProperty()
+    _id: string;
+    @ApiModelProperty()
+    accessToken: string;
+    @ApiModelProperty()
+    firstname: string;
+    @ApiModelProperty()
+    lastname: string;
+    @ApiModelProperty()
+    email: string;
+    @ApiModelProperty()
+    claims: ModelClaims = ModelClaims.ADMIN;
+    password: string;
+    @ApiModelProperty()
+    enable: boolean = true;
+    @ApiModelProperty()
+    emailVerified: boolean = false;
+    @ApiModelProperty()
+    emailVerificationId: string;
+    oldPasswords: string[] = [];
+    @ApiModelProperty()
+    isAdmin: boolean = true;
+}
 
 
 export enum ModelClaims {

@@ -1,34 +1,52 @@
 import * as joi from 'joi';
 import { Constraint } from '../../../modules/common';
-import { ModelUser } from './db/index';
-import { ApiModel, ApiModelProperty } from 'swagger-express-ts';
+import { ModelUser, ModelGender } from './db/index';
+import { ApiModel, ApiModelProperty, SwaggerDefinitionConstant } from 'swagger-express-ts';
+import { IModelResponse } from '../../interfaces/api/index';
 
 @ApiModel({
-    description: "User Response description",
+    description: "User Response",
     name: "UserResponse"
 })
-export class UserResponse {
+export class UserResponse implements IModelResponse {
     @ApiModelProperty({
-        description: "Success message"
+        description: "code",
+        required: true
     })
-    success: boolean = false;
-
+    code: number;
+    message: string;
+    error: string;
     @ApiModelProperty({
-        description: "Response message"
+        description: "data",
+        model: "ModelUser",
+        required: true
     })
-    message: string = 'Something Wrong';
-
-    @ApiModelProperty({
-        description: "Response code"
-    })
-    code: number = -1000;
-
-    @ApiModelProperty({
-        description: "Response User",
-        model:"ModelUser"
-    })
-    user: ModelUser = null;
+    data: ModelUser;
 }
+
+@ApiModel({
+    description: "User Error Response",
+    name: "UserErrorResponse"
+})
+export class UserErrorResponse implements IModelResponse {
+    @ApiModelProperty({
+        description: "code",
+        required: true
+    })
+    code: number;
+    @ApiModelProperty({
+        description: "message"
+    })
+    message: string;
+    @ApiModelProperty({
+        description: "error",
+        required: true
+    })
+    error: string;
+
+    data: any;
+}
+
 
 
 @ApiModel({
@@ -65,24 +83,32 @@ export class CreateUserRequest {
     password: string;
 
     @ApiModelProperty({
-        description: "Photo URL",
-        required: true
+        description: "BirthDate",
+        required: true,
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.date().iso().required())
+    birthDate: string;
+
+
+    @ApiModelProperty({
+        description: "Photo URL",
+        required: false
+    })
+    @Constraint(joi.string().allow(''))
     photoUrl: string;
 
     @ApiModelProperty({
         description: "Facebook ID",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     facebookId: string;
 
     @ApiModelProperty({
         description: "Facebook Access Token",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     facebookAccessToken: string;
 }
 
@@ -112,6 +138,8 @@ export class FindUserByIdRequest {
     @Constraint(joi.string().required())
     userId: string;
 }
+
+
 
 @ApiModel({
     description: "Edit photo of user by userId",
@@ -160,73 +188,80 @@ export class EditUserRequest {
     lastname: string;
 
     @ApiModelProperty({
-        description: "phoneNumber",
-        required: true
+        description: "BirthDate",
+        required: true,
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.date().iso().required())
+    birthDate: string;
+
+    @ApiModelProperty({
+        description: "phoneNumber",
+        required: false
+    })
+    @Constraint(joi.string().allow(''))
     phoneNumber: string;
 
     @ApiModelProperty({
         description: "photoUrl",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     photoUrl: string;
 
     @ApiModelProperty({
         description: "facebookId",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     facebookId: string;
 
     @ApiModelProperty({
         description: "facebookAccessToken",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     facebookAccessToken: string;
 
     @ApiModelProperty({
         description: "gender",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().valid('male', 'female').required())
-    gender: string;
+    @Constraint(joi.string().valid([ModelGender.female, ModelGender.male]))
+    gender: ModelGender;
 
     @ApiModelProperty({
         description: "address",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     address: string;
 
     @ApiModelProperty({
         description: "country",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     country: string;
 
     @ApiModelProperty({
         description: "state",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     state: string;
 
     @ApiModelProperty({
         description: "city",
-        required: true
+        required: false
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     city: string;
 
     @ApiModelProperty({
         description: "mobileToken",
         required: true
     })
-    @Constraint(joi.string().allow('').required())
+    @Constraint(joi.string().allow(''))
     mobileToken: string;
 }
 
@@ -241,6 +276,13 @@ export class EditUserPasswordRequest {
     })
     @Constraint(joi.string().required())
     userId: string;
+
+    @ApiModelProperty({
+        description: "oldPassword",
+        required: true
+    })
+    @Constraint(joi.string().required())
+    oldPassword: string;
 
     @ApiModelProperty({
         description: "password",
@@ -318,8 +360,8 @@ export class EditUserMobileTokensRequest {
 }
 
 @ApiModel({
-    description: "Edit facebook informations of user by userId",
-    name: "EditUserFacebookInformationsRequest"
+    description: "Find User By EmailVerificationId Request",
+    name: "FindUserByEmailVerificationIdRequest"
 })
 export class FindUserByEmailVerificationIdRequest {
     @ApiModelProperty({
@@ -329,4 +371,18 @@ export class FindUserByEmailVerificationIdRequest {
     @Constraint(joi.string().required())
     emailVerificationId: string;
 }
+
+@ApiModel({
+    description: "Find User By PasswordVerificationId Request",
+    name: "FindUserByPasswordVerificationIdRequest"
+})
+export class FindUserByPasswordVerificationIdRequest {
+    @ApiModelProperty({
+        description: "emailVerificationId",
+        required: true
+    })
+    @Constraint(joi.string().required())
+    passwordVerificationId: string;
+}
+
 

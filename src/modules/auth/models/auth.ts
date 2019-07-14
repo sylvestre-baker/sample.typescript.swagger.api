@@ -1,7 +1,9 @@
 import * as joi from 'joi';
 import { Constraint } from '../../../modules/common';
-import { ModelUser } from '../../users/models/index';
+import { ModelUser, ModelUserAdmin } from '../../users/models/index';
 import { ApiModel, ApiModelProperty } from 'swagger-express-ts';
+import { IModelResponse } from '../../interfaces/api/index';
+
 
 @ApiModel({
     description: "UserEmailPasswordAuthRequest",
@@ -29,16 +31,6 @@ export class UserEmailPasswordAuthRequest {
 })
 export class AccesTokenAuthResponse {
     @ApiModelProperty({
-        description: "success"
-    })
-    success: boolean;
-
-    @ApiModelProperty({
-        description: "message",
-    })
-    message: string;
-
-    @ApiModelProperty({
         description: "access_token",
     })
     access_token: string;
@@ -50,6 +42,22 @@ export class AccesTokenAuthResponse {
     user: ModelUser;
 }
 
+@ApiModel({
+    description: "AccesTokenAuthAdminResponse",
+    name: "AccesTokenAuthAdminResponse"
+})
+export class AccesTokenAuthAdminResponse {
+    @ApiModelProperty({
+        description: "access_token",
+    })
+    access_token: string;
+
+    @ApiModelProperty({
+        description: "user",
+        model:"ModelUserAdmin"
+    })
+    user: ModelUserAdmin;
+}
 
 @ApiModel({
     description: "UserEmailAuthRequest",
@@ -103,3 +111,153 @@ export class SendEmailPasswordLostResponse {
 }
 
 
+
+@ApiModel({
+    description: "PasswordLostResponse",
+    name: "PasswordLostResponse"
+})
+export class PasswordLostResponse implements IModelResponse{
+    @ApiModelProperty({
+        description: "code",
+        required:true
+    })
+    code : number;
+    message: string;
+    error: string;
+    @ApiModelProperty({
+        description: "data",
+        model: "SendEmailPasswordLostResponse",
+        required:true
+    })
+    data: SendEmailPasswordLostResponse;
+}
+
+@ApiModel({
+    description: "PasswordLostErrorResponse",
+    name: "PasswordLost"
+})
+export class PasswordLostErrorResponse implements IModelResponse{
+    @ApiModelProperty({
+        description: "code",
+        required:true
+    })
+    code : number;
+    @ApiModelProperty({
+        description: "message"
+    })
+    message: string;
+    @ApiModelProperty({
+        description: "error",
+        required:true
+    })
+    error: string;
+    
+    data: any;
+}
+
+@ApiModel({
+    description: "EmailVerificationResponse",
+    name: "EmailVerificationResponse"
+})
+export class EmailVerificationResponse implements IModelResponse{
+    @ApiModelProperty({
+        description: "code",
+        required:true
+    })
+    code : number;
+    message: string;
+    error: string;
+    @ApiModelProperty({
+        description: "data",
+        model: "SendEmailVerificationResponse",
+        required:true
+    })
+    data: SendEmailVerificationResponse;
+}
+
+@ApiModel({
+    description: "EmailVerificationErrorResponse",
+    name: "EmailVerificationErrorResponse"
+})
+export class EmailVerificationErrorResponse implements IModelResponse{
+    @ApiModelProperty({
+        description: "code",
+        required:true
+    })
+    code : number;
+    @ApiModelProperty({
+        description: "message"
+    })
+    message: string;
+    @ApiModelProperty({
+        description: "error",
+        required:true
+    })
+    error: string;
+    
+    data: any;
+}
+
+@ApiModel({
+    description: "Auth Response",
+    name: "AuthResponse"
+})
+export class AuthResponse implements IModelResponse{
+    @ApiModelProperty({
+        description: "code",
+        required:true
+    })
+    code : number;
+    message: string;
+    error: string;
+    @ApiModelProperty({
+        description: "data",
+        model: "AccesTokenAuthResponse",
+        required:true
+    })
+    data: AccesTokenAuthResponse;
+}
+
+@ApiModel({
+    description: "Auth Admin Response",
+    name: "AuthAdminResponse"
+})
+export class AuthAdminResponse implements IModelResponse{
+    @ApiModelProperty({
+        description: "code",
+        required:true
+    })
+    code : number;
+    message: string;
+    error: string;
+    @ApiModelProperty({
+        description: "data",
+        model: "AccesTokenAuthAdminResponse",
+        required:true
+    })
+    data: AccesTokenAuthAdminResponse;
+}
+
+
+@ApiModel({
+    description: "Auth Error Response",
+    name: "AuthErrorResponse"
+})
+export class AuthErrorResponse implements IModelResponse{
+    @ApiModelProperty({
+        description: "code",
+        required:true
+    })
+    code : number;
+    @ApiModelProperty({
+        description: "message"
+    })
+    message: string;
+    @ApiModelProperty({
+        description: "error",
+        required:true
+    })
+    error: string;
+    
+    data: any;
+}

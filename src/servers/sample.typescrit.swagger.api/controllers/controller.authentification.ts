@@ -1,12 +1,12 @@
 import { httpGet, httpPost, controller } from 'inversify-express-utils';
 import { injectable, inject } from 'inversify';
-import { validateBody, validateQuery, authorize, authorizeAdmin } from '../../../modules/common';
+import { validateBody, validateQuery, authorize, authorizeAdmin, ResponseFailure } from '../../../modules/common';
 
 import { Request, Response, NextFunction } from 'express';
 
 import { TYPES } from '../../../modules/common/';
-import { ServiceAuthentification, UserEmailAuthRequest, UserEmailPasswordAuthRequest, AccesTokenAuthResponse } from '../../../modules/auth/index';
-import { CreateUserRequest, FindUserByEmailRequest, ServiceUser, UserResponse, FindUserByEmailVerificationIdRequest } from '../../../modules/users/index';
+import { ServiceAuthentification, UserEmailAuthRequest, UserEmailPasswordAuthRequest, AccesTokenAuthResponse, AuthResponse } from '../../../modules/auth/index';
+import { CreateUserRequest, FindUserByEmailRequest, ServiceUser, UserResponse, FindUserByEmailVerificationIdRequest, ServiceUserAdmin, CreateUserAdminRequest } from '../../../modules/users/index';
 import * as appInsights from 'applicationinsights';
 import { ApiPath, ApiOperationPost, ApiOperationPut, ApiOperationDelete, SwaggerDefinitionConstant } from 'swagger-express-ts';
 
@@ -19,7 +19,7 @@ import { ApiPath, ApiOperationPost, ApiOperationPut, ApiOperationDelete, Swagger
 export class ControllerAuthentification {
     constructor(
         @inject(TYPES.ServiceAuthentification) private serviceAuthentification: ServiceAuthentification,
-        @inject(TYPES.ServiceUser) private serviceUser: ServiceUser,
+        @inject(TYPES.ServiceUserAdmin) private serviceUserAdmin: ServiceUserAdmin,
     ) { }
 
     @ApiOperationPost({
@@ -27,35 +27,29 @@ export class ControllerAuthentification {
         description: "Signup",
         summary: "Signup",
         parameters: {
-            body: { description: "Signup", required: true, model: "CreateUserRequest" }
+            body: { description: "Signup", required: true, model: "CreateUserAdminRequest" }
         },
 
         responses: {
-            200: { model: "AccesTokenAuthResponse" },
-            400: { model: "AccesTokenAuthResponse" }
+            200: { model: "AuthAdminResponse" },
+            400: { model: "AuthErrorResponse" },
+            500: { model: "AuthErrorResponse" }
         },
     })
-    @httpPost('/signup', validateBody(CreateUserRequest))
+    @httpPost('/signup', validateBody(CreateUserAdminRequest))
     public async signup(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
         try {
-            const accesTokenAuthResponse = await this.serviceAuthentification.signup(req.body, req.get('host'));
-            if (!accesTokenAuthResponse) {
-                const resp = new AccesTokenAuthResponse();
-                resp.access_token = null;
-                resp.message = 'BAD REQUEST';
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+            const resp = await this.serviceAuthentification.signupAdmin(req.body, req.get('host'));
+            if (!resp) {
+                res.status(400).send(`Object AuthResponse is null`);
             }
-            if (!accesTokenAuthResponse.success)
-                res.status(400).send(accesTokenAuthResponse);
             else
-                res.send(accesTokenAuthResponse);
-        }
-        catch (ex) {
+                res.status(resp.code).send(resp);
+
+        } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -69,7 +63,7 @@ export class ControllerAuthentification {
         },
 
         responses: {
-            200: { model: "AccesTokenAuthResponse" },
+            200: { model: "AuthAdminResponse" },
             400: { model: "AccesTokenAuthResponse" }
         },
     })
@@ -77,23 +71,15 @@ export class ControllerAuthentification {
     public async signin(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
         try {
-            const accesTokenAuthResponse = await this.serviceAuthentification.signin(req.body);
-            if (!accesTokenAuthResponse) {
-                const resp = new AccesTokenAuthResponse();
-                resp.access_token = null;
-                resp.message = 'BAD REQUEST';
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+            const resp = await this.serviceAuthentification.signinAdmin(req.body);
+            if (!resp) {
+                res.status(400).send(`Object AuthResponse is null`);
             }
-            if (!accesTokenAuthResponse.success)
-                res.status(400).send(accesTokenAuthResponse);
             else
-                res.send(accesTokenAuthResponse);
-        }
-        catch (ex) {
+                res.status(resp.code).send(resp);
+        } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -107,29 +93,25 @@ export class ControllerAuthentification {
         },
 
         responses: {
-            200: { model: "UserResponse" },
-            400: { model: "UserResponse" }
+            200: { model: "UserAdminResponse" },
+            400: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
     })
     @httpPost('/find/email/exist', validateBody(FindUserByEmailRequest))
     public async userWithEmailExist(req: Request, res: Response) {
         appInsights.defaultClient.trackNodeHttpRequest({ request: req, response: res });
         try {
-            const resp = await this.serviceUser.userWithEmailExist(req.body);
+            const resp = await this.serviceUserAdmin.findByEmail(req.body);
             if (!resp) {
-                const resp = new UserResponse();
-                resp.message = 'BAD REQUEST';
-                resp.success = false;
-                resp.user = null;
-                res.status(400).send(resp);
+                res.status(400).send(`Object UserResponse is null`);
             }
-            else if (!resp.success)
-                res.status(400).send(resp);
             else
-                res.send(resp);
+                res.status(resp.code).send(resp);
+
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 
@@ -147,8 +129,10 @@ export class ControllerAuthentification {
         },
 
         responses: {
-            200: { type: SwaggerDefinitionConstant.Parameter.Type.STRING },
-            400: { type: SwaggerDefinitionConstant.Parameter.Type.STRING }
+            200: { model: "UserAdminResponse" },
+            400: { model: "UserErrorResponse" },
+            405: { model: "UserErrorResponse" },
+            500: { model: "UserErrorResponse" }
         },
     })
     @httpGet('/verify')
@@ -159,22 +143,21 @@ export class ControllerAuthentification {
                 const find = new FindUserByEmailVerificationIdRequest();
                 find.emailVerificationId = req.query.id;
 
-                const resp = await this.serviceUser.verifyEmail(find, req.get('host'));
+                const resp = await this.serviceUserAdmin.verifyEmail(find);
                 console.log("Domain is matched. Information is from Authentic email");
-                if (resp.success) {
-                    res.end(`<h1>${resp.message} </h1>`);
+                if (!resp) {
+                    res.status(400).send(`Object UserResponse is null`);
                 }
-                else {
-                    res.end(`<h1>${resp.message} </h1>`);
-                }
+                else
+                    res.status(resp.code).send(resp);
             }
             else {
-                res.end("<h1>Request is from unknown source");
+                res.status(405).send(ResponseFailure(405, "Request is from unknown source"));
             }
 
         } catch (ex) {
             appInsights.defaultClient.trackException({ exception: new Error(ex) });
-            res.status(500);
+            res.status(500).send(ResponseFailure(500, ex));
         }
     }
 }
