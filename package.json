@@ -27,7 +27,7 @@
     "applicationinsights": "^1.0.3",
     "base-64": "^0.1.0",
     "base64-img": "^1.0.4",
-    "bcrypt": "^3.0.0",
+    "bcrypt": "^5.0.0",
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "generate-password": "^1.4.0",
