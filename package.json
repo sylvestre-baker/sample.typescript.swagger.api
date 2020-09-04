@@ -35,7 +35,7 @@
     "inversify-express-utils": "^4.0.1",
     "joi": "^13.0.1",
     "jsonwebtoken": "^8.3.0",
-    "mongodb": "^2.2.33",
+    "mongodb": "^3.6.1",
     "mqtt": "^2.18.8",
     "node-code-generator": "^1.0.3",
     "nodemailer": "^4.6.8",
